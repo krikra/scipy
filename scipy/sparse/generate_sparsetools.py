@@ -105,6 +105,25 @@ csr_has_sorted_indices    i iII
 csr_has_canonical_format  i iII
 """
 
+# csrs.h
+CSRS_ROUTINES = """
+csrs_diagonal        v iiIIT*T
+csrs_tocsr           v iiIIT*I*I*T
+csrs_matvec          v iiIITT*T
+csrs_matvecs         v iiiIITT*T
+csrs_elmul_csrs      v iiIITIIT*I*I*T
+csrs_eldiv_csrs      v iiIITIIT*I*I*T
+csrs_plus_csrs       v iiIITIIT*I*I*T
+csrs_minus_csrs      v iiIITIIT*I*I*T
+csrs_maximum_csrs    v iiIITIIT*I*I*T
+csrs_minimum_csrs    v iiIITIIT*I*I*T
+csrs_ne_csrs         v iiIITIIT*I*I*B
+csrs_lt_csrs         v iiIITIIT*I*I*B
+csrs_gt_csrs         v iiIITIIT*I*I*B
+csrs_le_csrs         v iiIITIIT*I*I*B
+csrs_ge_csrs         v iiIITIIT*I*I*B
+"""
+
 # coo.h, dia.h, csgraph.h
 OTHER_ROUTINES = """
 coo_tocsr           v iiiIIT*I*I*T
@@ -119,6 +138,7 @@ COMPILATION_UNITS = [
     ('bsr', BSR_ROUTINES),
     ('csr', CSR_ROUTINES),
     ('csc', CSC_ROUTINES),
+    ('csrs', CSRS_ROUTINES),
     ('other', OTHER_ROUTINES),
 ]
 
