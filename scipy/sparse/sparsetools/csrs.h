@@ -97,15 +97,15 @@ void csrs_tocsr(const I n_row,
     const I nnz = Ap[n_row];
 
     //compute number of non-zero entries per column of A 
-    //std::fill(Bp, Bp + n_row, 0);
+    std::fill(Bp, Bp + n_row, 0);
 
-	 for (I row = 0; row < n_row; row++){
-	     Bp[row] = Ap[row + 1] - Ap[row] - 1;
+    for(I row = 0; row < n_row; row++){
+	     Bp[row]++;
+	     for(I jj = Ap[row]+1; jj < Ap[row+1]; jj++){
+		      Bp[row]++;
+		      Bp[Aj[jj]]++;
+		  }
 	 }
-
-    for (I n = 0; n < nnz; n++){            
-        Bp[Aj[n]]++;
-    }
 
     //cumsum the nnz per column to get Bp[]
     for(I col = 0, cumsum = 0; col < n_col; col++){     
@@ -125,14 +125,16 @@ void csrs_tocsr(const I n_row,
 
             Bp[col]++;
         }
-	     std::copy(&Aj[Ap[row]], &Aj[Ap[row+1]], &Bj[Bp[row]]);
-	     std::copy(&Ax[Ap[row]], &Ax[Ap[row+1]], &Bx[Bp[row]]);
-    }  
+    }
+    for(I row = 0; row < n_row - 1; row++){
+	     std::copy(&Aj[Ap[row]+1], &Aj[Ap[row+1]], &Bj[Bp[row]]);
+	     std::copy(&Ax[Ap[row]+1], &Ax[Ap[row+1]], &Bx[Bp[row]]);
+    }
 
 
-    for(I col = 0, last = 0; col <= n_col; col++){
-        I temp  = Bp[col];
-        Bp[col] = last;
+    for(I row = 0, last = 0; row <= n_row; row++){
+        I temp  = Bp[row] + (Ap[row+1] - (Ap[row]+1));
+        Bp[row] = last;
         last    = temp;
     }
 }   

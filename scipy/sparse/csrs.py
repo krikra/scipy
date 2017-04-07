@@ -156,8 +156,8 @@ class csrs_matrix(csr_matrix, IndexMixin):
                    indices,
                    data)
 
-        from .csc import csc_matrix
-        A = csc_matrix((data, indices, indptr), shape=self.shape)
+        #from .csr import csc_matrix
+        A = csr_matrix((data, indices, indptr), shape=self.shape)
         A.has_sorted_indices = True
         return A
 
