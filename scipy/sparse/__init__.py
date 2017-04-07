@@ -227,6 +227,7 @@ from __future__ import division, print_function, absolute_import
 
 from .base import *
 from .csr import *
+from .csrs import *
 from .csc import *
 from .lil import *
 from .dok import *

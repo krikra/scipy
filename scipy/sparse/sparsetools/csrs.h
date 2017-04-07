@@ -271,10 +271,11 @@ void csrs_matvec(const I n_row,
 	                  T Yx[])
 {
     for(I i = 0; i < n_row; i++){
-        T sum_u = Yx[i];
-        for(I jj = Ap[i]; jj < Ap[i+1]; jj++){
+	     I diag = Ap[i];
+        Yx[i] += Ax[diag] * Xx[i];
+        for(I jj = Ap[i]+1; jj < Ap[i+1]; jj++){
             Yx[i]      += Ax[jj] * Xx[Aj[jj]];
-            Yx[Aj[jj]] += Ax[jj] * Xx[jj];
+            Yx[Aj[jj]] += Ax[jj] * Xx[i];
         }
     }
 }

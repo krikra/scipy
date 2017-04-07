@@ -4,7 +4,7 @@ from __future__ import division, print_function, absolute_import
 
 __docformat__ = "restructuredtext en"
 
-__all__ = ['csr_matrix', 'isspmatrix_csr']
+__all__ = ['csrs_matrix', 'isspmatrix_csrs']
 
 
 import numpy as np
@@ -12,16 +12,16 @@ from scipy._lib.six import xrange
 
 from .base import spmatrix
 
-from ._sparsetools import csrs_tocsc, csr_tobsr, csr_count_blocks, \
+from ._sparsetools import csrs_tocsr, csr_count_blocks, \
         get_csr_submatrix, csr_sample_values
 from .sputils import (upcast, isintlike, IndexMixin, issequence,
                       get_index_dtype, ismatrix)
 
 from .compressed import _cs_matrix
-from .csr import _csr_matrix
+from .csr import csr_matrix
 
 
-class csrs_matrix(_csr_matrix, IndexMixin):
+class csrs_matrix(csr_matrix, IndexMixin):
     """
     Compressed Sparse Row matrix
 
@@ -129,48 +129,6 @@ class csrs_matrix(_csr_matrix, IndexMixin):
     """
     format = 'csrs'
 
-"""
-    def __init__(self, arg1, shape=None, dtype=None, copy=False):
-        try:
-            super().__init__(self, arg1, shape=None, dtype=None, copy=False)
-        except ValueError:
-            if len(arg1) == 4:
-                # (data_diag, data, indices, indptr) format 
-                data_diag, data, indices, indptr = arg1
-
-                maxval = None
-                if shape is not None:
-                    maxval = max(shape)
-                idx_dtype = get_index_dtype((indices, indptr), maxval=maxval, check_contents=True)
-
-                self.indices = np.array(indices, copy=copy, dtype=idx_dtype)
-                self.indptr = np.array(indptr, copy=copy, dtype=idx_dtype)
-                self.data = np.array(diag, copy=copy, dtype=dtype)
-                self.data_diag = np.array(diag, copy=copy, dtype=dtype)
-
-                # Read matrix dimensions given, if any
-                if shape is not None:
-                    self.shape = shape   # spmatrix will check for errors
-                else:
-                    if self.shape is None:
-                        # shape not already set, try to infer dimensions
-                        try:
-                            major_dim = len(self.indptr) - 1
-                            minor_dim = self.indices.max() + 1
-                        except:
-                            raise ValueError('unable to infer matrix dimensions')
-                        else:
-                            self.shape = self._swap((major_dim,minor_dim))
-
-                if dtype is not None:
-                    self.data = np.asarray(self.data, dtype=dtype)
-                    self.data_diag = np.asarray(self.data, dtype=dtype)
-
-                self.check_format(full_check=False)
-            else:
-                raise ValueError("unrecognized %s_matrix constructor usage" %
-"""
-
     def transpose(self, axes=None, copy=False):
         if axes is not None:
             raise ValueError(("Sparse matrices do not support "
@@ -268,7 +226,7 @@ class csrs_matrix(_csr_matrix, IndexMixin):
             if isintlike(col):
                 if col > row:
                     return self._get_single_element(col, row)
-                else
+                else:
                     return self._get_single_element(row, col)
             # [i, 1:2]
             elif isinstance(col, slice):

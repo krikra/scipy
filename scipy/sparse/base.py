@@ -46,7 +46,8 @@ _formats = {'csc': [0, "Compressed Sparse Column"],
             'jad': [16, "JAgged Diagonal"],
             'uss': [17, "Unsymmetric Sparse Skyline"],
             'vbr': [18, "Variable Block Row"],
-            'und': [19, "Undefined"]
+            'csrs': [19, "Compressed Sparse Row-Symmetric"],
+            'und': [20, "Undefined"]
             }
 
 
