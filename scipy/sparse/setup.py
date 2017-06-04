@@ -56,7 +56,9 @@ def configuration(parent_package='',top_path=None):
                                   os.path.join('sparsetools', 'csc.cxx'),
                                   os.path.join('sparsetools', 'bsr.cxx'),
                                   os.path.join('sparsetools', 'other.cxx'),
-                                  get_sparsetools_sources]
+                                  get_sparsetools_sources],
+						 extra_compile_args=['-fopenmp -fPIC'],
+						 extra_link_args=['-lgomp']
                          )
 
     return config

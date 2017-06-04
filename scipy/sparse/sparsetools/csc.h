@@ -1,6 +1,7 @@
 #ifndef __CSC_H__
 #define __CSC_H__
 
+#include <omp.h>
 #include "csr.h"
 
 /*
@@ -33,15 +34,36 @@ void csc_matvec(const I n_row,
 	            const T Xx[],
 	                  T Yx[])
 { 
+	I n_threads = omp_get_max_threads();
+	T *work = (T *)calloc(sizeof(T), n_col * n_threads);
+
+	T sum = 0.0;
+	#pragma omp parallel private(sum)
+	{
+	I th = omp_get_thread_num();
+	#pragma omp for
     for(I j = 0; j < n_col; j++){
         I col_start = Ap[j];
         I col_end   = Ap[j+1];
 
         for(I ii = col_start; ii < col_end; ii++){
             I i    = Ai[ii];
-            Yx[i] += Ax[ii] * Xx[j];
+            work[i + n_col * th] += Ax[ii] * Xx[j];
         }
     }
+
+	#pragma omp for
+	for(I i = 0; i < n_col; i++){
+		sum = 0.0;
+		for(I j = 0; j < n_threads; j++){
+			sum += work[i + n_threads * j];
+		}
+
+		Yx[i] = sum;
+	}
+	}
+	
+	free(work);
 }
 
 
@@ -75,12 +97,14 @@ void csc_matvecs(const I n_row,
 	             const T Xx[],
 	                   T Yx[])
 {
+	//#pragma omp parallel for private(ii, i)
     for(I j = 0; j < n_col; j++){
         for(I ii = Ap[j]; ii < Ap[j+1]; ii++){
             const I i = Ai[ii];
             axpy(n_vecs, Ax[ii], Xx + (npy_intp)n_vecs * j, Yx + (npy_intp)n_vecs * i);
         }
     }
+
 }
 
 

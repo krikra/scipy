@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <omp.h>
 
 #include "util.h"
 #include "dense.h"
@@ -1089,6 +1090,7 @@ void csr_matvec(const I n_row,
 	            const T Xx[],
 	                  T Yx[])
 {
+	#pragma omp parallel for
     for(I i = 0; i < n_row; i++){
         T sum = Yx[i];
         for(I jj = Ap[i]; jj < Ap[i+1]; jj++){
@@ -1126,6 +1128,7 @@ void csr_matvecs(const I n_row,
 	             const T Xx[],
 	                   T Yx[])
 {
+	#pragma omp parallel for
     for(I i = 0; i < n_row; i++){
         T * y = Yx + (npy_intp)n_vecs * i;
         for(I jj = Ap[i]; jj < Ap[i+1]; jj++){

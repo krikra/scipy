@@ -272,14 +272,54 @@ void csrs_matvec(const I n_row,
 	            const T Xx[],
 	                  T Yx[])
 {
-    for(I i = 0; i < n_row; i++){
-	     I diag = Ap[i];
+	I n_threads = omp_get_max_threads();
+	T *work = (T *)calloc(sizeof(T), n_threads * n_col);
+
+/*
+	//diagnal block
+	#pragma omp parallel private(diag, jj)
+    for(I i = row_start; i < row_end; i++){
+	    I diag = Ap[i];
         Yx[i] += Ax[diag] * Xx[i];
         for(I jj = Ap[i]+1; jj < Ap[i+1]; jj++){
             Yx[i]      += Ax[jj] * Xx[Aj[jj]];
             Yx[Aj[jj]] += Ax[jj] * Xx[i];
         }
     }
+*/
+
+	//off-diagonal block
+	T sum = 0.0;
+	#pragma omp parallel private(sum)
+	{
+	I th = omp_get_thread_num();
+	//I row_start = n_row * th / n_threads;
+	//I row_end = n_row * (th + 1) / n_threads;
+
+    //for(I i = row_start; i < row_end; i++){
+	#pragma omp for
+    for(I i = 0; i < n_row; i++){
+		sum = 0.0;
+        for(I jj = Ap[i]+1; jj < Ap[i+1]; jj++){
+            sum                       += Ax[jj] * Xx[Aj[jj]];
+            work[Aj[jj] + th * n_col] += Ax[jj] * Xx[i];
+        }
+	    I diag = Ap[i];
+        Yx[i] = Ax[diag] * Xx[i] + sum;
+    }
+
+	#pragma omp for
+	for(I i = 0; i < n_col; i++){
+		sum = 0.0;
+		for(I j = 0; j < n_threads; j++){
+			sum += work[i + n_col * j];
+		}
+
+		Yx[i] += sum;
+	}
+	}
+	
+	free(work);
 }
 
 
