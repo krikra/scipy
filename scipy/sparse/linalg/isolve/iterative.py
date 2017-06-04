@@ -208,12 +208,15 @@ def bicgstab(A, b, x0=None, tol=1e-5, maxiter=None, xtype=None, M=None, callback
                'The real or complex N-by-N matrix of the linear system.\n'
                '``A`` must represent a hermitian, positive definite matrix.')
 @non_reentrant()
-def cg(A, b, x0=None, tol=1e-5, maxiter=None, xtype=None, M=None, callback=None):
+def cg(A, b, x0=None, tol=1e-5, maxiter=None, xtype=None, M=None, callback=None, resid_history=False):
     A,M,x,b,postprocess = make_system(A,M,x0,b,xtype)
 
     n = len(b)
     if maxiter is None:
         maxiter = n*10
+
+    if resid_history:
+        rhistory = []
 
     matvec = A.matvec
     psolve = M.matvec
@@ -235,6 +238,7 @@ def cg(A, b, x0=None, tol=1e-5, maxiter=None, xtype=None, M=None, callback=None)
         olditer = iter_
         x, iter_, resid, info, ndx1, ndx2, sclr1, sclr2, ijob = \
            revcom(b, x, work, iter_, resid, info, ndx1, ndx2, ijob)
+
         if callback is not None and iter_ > olditer:
             callback(x)
         slice1 = slice(ndx1-1, ndx1-1+n)
@@ -256,13 +260,18 @@ def cg(A, b, x0=None, tol=1e-5, maxiter=None, xtype=None, M=None, callback=None)
                 info = -1
                 ftflag = False
             bnrm2, resid, info = stoptest(work[slice1], b, bnrm2, tol, info)
+            if resid_history:
+                rhistory.append(resid)
         ijob = 2
 
     if info > 0 and iter_ == maxiter and resid > tol:
         # info isn't set appropriately otherwise
         info = iter_
 
-    return postprocess(x), info
+    if resid_history:
+        return postprocess(x), info, rhistory
+    else:
+        return postprocess(x), info
 
 
 @set_docstring('Use Conjugate Gradient Squared iteration to solve ``Ax = b``.',
